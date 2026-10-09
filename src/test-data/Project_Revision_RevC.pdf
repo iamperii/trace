@@ -1,0 +1,87 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 578 >>
+stream
+BT
+/F1 10 Tf
+48 760 Td
+13 TL
+(SYNTHETIC TRAINING DATA - NOT A REAL PROJECT OR ISSUED TENDER) Tj
+T*
+(BAKU COMMERCIAL CENTER - DESIGN REVISION C) Tj
+T*
+(Revision reference: BCC-2026-041-C | Issue date: 02 October 2026) Tj
+T*
+(All project details and quantities in this sample are fictional.) Tj
+T*
+() Tj
+T*
+(CHANGE C-07 - FLOOR FINISH FF-02 \(CHANGED\)) Tj
+T*
+(Extend porcelain floor finish FF-02 to the Level 3 retail mall.) Tj
+T*
+(Revised total area: 5,100 m2. Previous area: 4,700 m2.) Tj
+T*
+(Update the BOQ quantity and coordinate the revised area with the drawings.) Tj
+T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 562 >>
+stream
+BT
+/F1 10 Tf
+48 760 Td
+13 TL
+(BAKU COMMERCIAL CENTER - DESIGN REVISION C \(continued\)) Tj
+T*
+(CHANGE C-02 - SITE DRAINAGE PIPE DN110 \(CHANGED\)) Tj
+T*
+(Following the coordinated site drainage layout, increase HDPE DN110 SDR17) Tj
+T*
+(pipe from 1,240 m to 1,550 m. The revised quantity supersedes earlier schedules.) Tj
+T*
+(Update the BOQ and obtain a supplier quotation covering the revised quantity.) Tj
+T*
+() Tj
+T*
+(IMPLEMENTATION NOTE) Tj
+T*
+(This sample revision is deliberately not reflected in BOQ_RevA.xlsx.) Tj
+T*
+(END OF SYNTHETIC REVISION C) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000191 00000 n 
+0000000317 00000 n 
+0000000946 00000 n 
+0000001072 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+1685
+%%EOF
