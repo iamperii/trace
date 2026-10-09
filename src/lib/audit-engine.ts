@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BOQ_ROWS, PASSED_CHECKS, REVISION_CHANGES, RAW_AI_FINDINGS } from "./demo-data";
+import type { BoqRow, RevisionChange } from "./demo-data";
 
 /* ---------- Structured AI output schema (validated before display) ---------- */
 
@@ -81,7 +81,7 @@ export function totalCostImpact(findings: Finding[]): number {
   return round2(findings.reduce((s, f) => s + (costImpact(f.cost) ?? 0), 0));
 }
 
-export function boqRowDiff(row: (typeof BOQ_ROWS)[number]) {
+export function boqRowDiff(row: BoqRow) {
   if (row.boq === null) return { diff: null as number | null, risk: "CRITICAL" as "CRITICAL" | "HIGH" | "MEDIUM" | "OK", value: null as number | null };
   const diff = row.required === null ? 0 : row.boq - row.required;
   const unitMismatch = row.boqUnit !== undefined && row.boqUnit !== row.unit;
@@ -89,7 +89,7 @@ export function boqRowDiff(row: (typeof BOQ_ROWS)[number]) {
   return { diff, risk, value: row.unitPrice === null ? null : round2(row.boq * row.unitPrice) };
 }
 
-export function revisionSummary(changes = REVISION_CHANGES) {
+export function revisionSummary(changes: RevisionChange[]) {
   return {
     added: changes.filter((c) => c.type === "ADDED").length,
     changed: changes.filter((c) => c.type === "CHANGED").length,
@@ -99,7 +99,15 @@ export function revisionSummary(changes = REVISION_CHANGES) {
   };
 }
 
-export function summarize(findings: Finding[], passed = PASSED_CHECKS.length) {
+export function revisionFindings(findings: Finding[]) {
+  return findings.filter((f) => f.category === "REVISION_DIFFERENCE");
+}
+
+export function boqFindings(findings: Finding[]) {
+  return findings.filter((f) => ["SPECIFICATION_BOQ_MISMATCH", "MISSING_REQUIREMENT", "QUANTITY_UNIT", "COMMERCIAL", "REVISION_DIFFERENCE"].includes(f.category));
+}
+
+export function summarize(findings: Finding[], passed = 0) {
   const count = (s: Severity) => findings.filter((f) => f.severity === s).length;
   return {
     total: findings.length,
@@ -115,19 +123,3 @@ export function summarize(findings: Finding[], passed = PASSED_CHECKS.length) {
 export const fmtNum = (n: number, d = 0) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: 2 });
 export const fmtAzn = (n: number) => `₼${n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
 
-/* ---------- AI service abstraction ---------- */
-
-export interface AuditProvider {
-  mode: "demo" | "live";
-  analyze(): Promise<{ findings: Finding[]; rejected: number }>;
-}
-
-/** Demo provider: deterministic synthetic analysis, works offline. */
-export const demoProvider: AuditProvider = {
-  mode: "demo",
-  async analyze() {
-    return validateFindings(RAW_AI_FINDINGS);
-  },
-};
-
-export const DEMO_FINDINGS = validateFindings(RAW_AI_FINDINGS).findings;

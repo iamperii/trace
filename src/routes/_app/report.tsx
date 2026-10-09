@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SeverityBadge, StatusBadge, statusLabel } from "@/components/tg/badges";
-import { CATEGORY_LABELS, boqRowDiff, costImpact, fmtAzn, fmtNum, revisionSummary, summarize, type Finding } from "@/lib/audit-engine";
-import { BOQ_ROWS, DOCUMENTS, REVISION_CHANGES } from "@/lib/demo-data";
+import { CATEGORY_LABELS, boqFindings, costImpact, fmtAzn, fmtNum, revisionFindings, summarize, type Finding } from "@/lib/audit-engine";
+import { AuditComparisonTable } from "@/components/tg/AuditComparisonTable";
 import { useAudit } from "@/lib/audit-store";
 import { pageMeta } from "@/lib/meta";
 
@@ -18,9 +18,8 @@ function H({ n, t }: { n: number; t: string }) {
 
 function Report() {
   const { statusOf, findings: DEMO_FINDINGS, passedCount, projectName, live, files } = useAudit();
-  const auditedDocs = files.filter((f) => f.status === "ready");
+  const auditedDocs = files.filter((f) => f.status === "ready" && !f.demo);
   const s = summarize(DEMO_FINDINGS, passedCount);
-  const r = revisionSummary();
   const bySev = (sev: Finding["severity"]) => DEMO_FINDINGS.filter((f) => f.severity === sev);
   const counts = { NEEDS_REVIEW: 0, CONFIRMED: 0, INVESTIGATE: 0, DISMISSED: 0 };
   DEMO_FINDINGS.forEach((f) => counts[statusOf(f.findingId).status]++);
@@ -53,31 +52,27 @@ function Report() {
         </div>
 
         <H n={1} t="Executive Summary" />
-        <p className="text-sm">TRACE cross-checked {auditedDocs.length || DOCUMENTS.length} documents across {s.checks} checks. {s.total} potential inconsistencies were detected ({s.critical} critical, {s.high} high, {s.medium} medium) and {s.passed} checks passed. The estimated commercial impact of quantifiable findings is <b>{fmtAzn(s.costImpact)}</b> (requires human verification). This report does not approve the tender or certify compliance; all findings require human review.</p>
+        <p className="text-sm">TRACE cross-checked {live ? auditedDocs.length : 0} documents across {s.checks} checks. {s.total} potential inconsistencies were detected ({s.critical} critical, {s.high} high, {s.medium} medium) and {s.passed} checks passed. The estimated commercial impact of quantifiable findings is <b>{fmtAzn(s.costImpact)}</b> (requires human verification). This report does not approve the tender or certify compliance; all findings require human review.</p>
 
         <H n={2} t="Documents Audited" />
-        <ul className="text-sm">{(auditedDocs.length ? auditedDocs.map((d) => ({ id: d.name, label: d.name, name: d.name, extractedItems: null as number | null })) : DOCUMENTS).map((d) => <li key={d.id}>• {d.label} — <span className="font-mono text-xs">{d.name}</span>{d.extractedItems != null ? ` (${d.extractedItems} items extracted)` : ""}</li>)}</ul>
+        <ul className="text-sm">{(live ? auditedDocs : []).map((d) => <li key={d.name}>• {d.name}</li>)}</ul>
+        {!live && <p className="text-sm text-muted-foreground">No audit results yet.</p>}
 
         <H n={3} t="Critical Findings" /><FList items={bySev("CRITICAL")} />
         <H n={4} t="High-Risk Findings" /><FList items={[...bySev("HIGH"), ...bySev("MEDIUM")]} />
 
         <H n={5} t="Revision Impact" />
-        <p className="text-sm">Revision B → C: {r.added} added, {r.changed} changed, {r.removed} removed requirements; {r.boqAffected} BOQ items affected; {r.notUpdated} not yet reflected in the BOQ.</p>
-        <ul className="mt-2 text-sm">{REVISION_CHANGES.filter((c) => !c.boqUpdated).map((c) => <li key={c.id}>• {c.id} {c.requirement}: {c.previous} → {c.next}, BOQ {c.boq}</li>)}</ul>
+        <AuditComparisonTable findings={revisionFindings(DEMO_FINDINGS)} emptyMessage={live ? "No revision inconsistencies were reported in this audit." : "No audit results yet."} />
 
         <H n={6} t="BOQ Differences" />
-        <table className="w-full text-sm">
-          <thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="py-1">Item</th><th>Description</th><th className="text-right">Required</th><th className="text-right">BOQ</th><th className="text-right">Diff.</th></tr></thead>
-          <tbody>{BOQ_ROWS.filter((b) => boqRowDiff(b).risk !== "OK").map((b) => { const d = boqRowDiff(b); return (
-            <tr key={b.item} className="border-b"><td className="py-1 font-mono text-xs">{b.item}</td><td>{b.description}</td><td className="tabular text-right">{b.required === null ? "Req." : `${fmtNum(b.required)} ${b.unit}`}</td><td className="tabular text-right">{b.boq === null ? "Missing" : `${fmtNum(b.boq)} ${b.boqUnit ?? b.unit}`}</td><td className="tabular text-right">{d.diff === null ? "—" : fmtNum(d.diff)}</td></tr>
-          ); })}</tbody>
-        </table>
+        <AuditComparisonTable findings={boqFindings(DEMO_FINDINGS)} emptyMessage={live ? "No BOQ inconsistencies were reported in this audit." : "No audit results yet."} />
 
         <H n={7} t="Estimated Commercial Impact" />
         <table className="w-full text-sm"><tbody>
-          {DEMO_FINDINGS.filter((f) => f.cost).map((f) => (
-            <tr key={f.findingId} className="border-b"><td className="py-1">{f.title}</td><td className="tabular font-mono text-xs">{fmtNum(f.cost!.quantity)} {f.cost!.unit} × {fmtAzn(f.cost!.unitPrice)}</td><td className="tabular text-right font-semibold">{fmtAzn(costImpact(f.cost)!)}</td></tr>
-          ))}
+          {DEMO_FINDINGS.map((f) => {
+            if (!f.cost) return null;
+            return <tr key={f.findingId} className="border-b"><td className="py-1">{f.title}</td><td className="tabular font-mono text-xs">{fmtNum(f.cost.quantity)} {f.cost.unit} × {fmtAzn(f.cost.unitPrice)}</td><td className="tabular text-right font-semibold">{fmtAzn(costImpact(f.cost) ?? 0)}</td></tr>;
+          })}
           <tr><td className="py-2 font-semibold">Total (estimate — requires human verification)</td><td /><td className="tabular text-right text-lg font-semibold">{fmtAzn(s.costImpact)}</td></tr>
         </tbody></table>
 

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, SeverityBadge, StatusBadge } from "./badges";
 import { CATEGORY_LABELS, costImpact, fmtAzn, fmtNum, numericDifference, type Finding } from "@/lib/audit-engine";
-import { DOCUMENTS } from "@/lib/demo-data";
 import { useAudit } from "@/lib/audit-store";
 
 export function FindingDrawer({ finding, onClose }: { finding: Finding | null; onClose: () => void }) {
@@ -44,13 +43,12 @@ function Detail({ f }: { f: Finding }) {
         <h3 className="mb-3 text-sm font-semibold">Evidence</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {f.documents.map((d, i) => {
-            const doc = DOCUMENTS.find((x) => x.id === d.docId);
-            const Icon = doc?.type === "XLSX" ? FileSpreadsheet : FileText;
+            const Icon = /\.xlsx?$/i.test(d.name) ? FileSpreadsheet : FileText;
             return (
               <div key={i} className="rounded-lg border bg-card">
                 <div className="flex items-center gap-2 border-b px-3 py-2">
                   <Icon className="h-4 w-4 text-primary" />
-                  <div className="min-w-0 flex-1 truncate text-xs font-semibold">{doc?.label ?? d.name}</div>
+                  <div className="min-w-0 flex-1 truncate text-xs font-semibold">{d.name}</div>
                   <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">{d.page ? `Page ${d.page}` : d.row ? `Row ${d.row}` : "—"}</span>
                 </div>
                 <blockquote className="p-3 font-mono text-xs leading-relaxed"><Highlight text={d.evidence} mark={d.highlight} /></blockquote>

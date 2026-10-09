@@ -4,7 +4,7 @@ import { UploadCloud, FileText, FileSpreadsheet, CheckCircle2, XCircle, Trash2, 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/tg/badges";
-import { CATEGORY_LABEL, type DocCategory } from "@/lib/demo-data";
+import { CATEGORY_LABEL, type DocCategory } from "@/lib/document-types";
 import { useAudit, type UploadedFile } from "@/lib/audit-store";
 import { pageMeta } from "@/lib/meta";
 import { extractText, extractedTexts } from "@/lib/extract";
@@ -131,7 +131,7 @@ function NewAudit() {
       )}
 
       <div className="mt-6 flex items-center justify-between rounded-lg border bg-card p-4">
-        <p className="text-sm text-muted-foreground">{ready.some((f) => !f.demo) ? "Live AI: your uploaded documents will be read and cross-checked by AI. Findings still need human review." : "Demo Mode: analysis uses the synthetic Baku Commercial Center dataset. Upload your own files for live AI analysis."}</p>
+        <p className="text-sm text-muted-foreground">Live AI audit · Human review required</p>
         <Button size="lg" onClick={run} disabled={ready.length === 0 || busy}><Play className="mr-2 h-4 w-4" /> Run AI Audit</Button>
       </div>
     </>

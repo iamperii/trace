@@ -8,7 +8,6 @@ import { extractedTexts } from "@/lib/extract";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAudit } from "@/lib/audit-store";
-import { DOCUMENTS } from "@/lib/demo-data";
 import { pageMeta } from "@/lib/meta";
 
 export const Route = createFileRoute("/_app/processing")({
@@ -28,7 +27,7 @@ function Processing() {
   const [live] = useState(() => files.filter((f) => f.status === "ready" && !f.demo && extractedTexts.has(f.name)));
   const [started, setStarted] = useState(false);
     const nav = useNavigate();
-  const docs = files.filter((f) => f.status === "ready").length || DOCUMENTS.length;
+  const docs = live.length;
 
   useEffect(() => {
     if (live.length > 0) {
@@ -47,10 +46,6 @@ function Processing() {
         })
         .catch((e: unknown) => setError(e instanceof Error ? e.message : "AI analysis failed."));
       return undefined;
-    }
-    if (false) {
-      const t = setTimeout(() => setStep((s) => s + 1), step === 4 ? 1400 : 700);
-      return () => clearTimeout(t);
     }
     nav({ to: "/new-audit" });
     return undefined;

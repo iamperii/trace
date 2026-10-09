@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { DocCategory } from "./demo-data";
+import type { DocCategory } from "./document-types";
 import { type Finding } from "./audit-engine";
 
 export interface LiveResult { findings: Finding[]; passed: number; rejected: number; at: string }

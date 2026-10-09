@@ -2,10 +2,9 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { FileBarChart, GitCompare, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PageHeader, SeverityBadge, StatusBadge, SyntheticTag } from "./badges";
+import { PageHeader, SeverityBadge, StatusBadge } from "./badges";
 import { FindingDrawer } from "./FindingDrawer";
 import { CATEGORY_LABELS, costImpact, fmtAzn, fmtNum, summarize } from "@/lib/audit-engine";
-import { DOCUMENTS, PASSED_CHECKS } from "@/lib/demo-data";
 import { useAudit } from "@/lib/audit-store";
 
 export function FindingsWorkspace({ selected, basePath }: { selected?: string | undefined; basePath: "/results" | "/findings" }) {
@@ -14,7 +13,6 @@ export function FindingsWorkspace({ selected, basePath }: { selected?: string | 
   const s = summarize(DEMO_FINDINGS, passedCount);
   const open = DEMO_FINDINGS.find((f) => f.findingId === selected) ?? null;
   const costed = DEMO_FINDINGS.filter((f) => f.cost);
-  const docLabel = (id: string) => DOCUMENTS.find((d) => d.id === id)?.label ?? id;
 
   return (
     <>
@@ -66,7 +64,7 @@ export function FindingsWorkspace({ selected, basePath }: { selected?: string | 
                     <div className="text-xs text-muted-foreground">{f.findingId} · confidence {Math.round(f.confidence * 100)}%</div>
                   </TableCell>
                   <TableCell className="text-sm">{CATEGORY_LABELS[f.category]}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{[...new Set(f.documents.map((d) => DOCUMENTS.some((x) => x.id === d.docId) ? docLabel(d.docId) : d.name))].join(" ↔ ")}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{[...new Set(f.documents.map((d) => d.name))].join(" ↔ ")}</TableCell>
                   <TableCell className="tabular text-right text-sm">{imp !== null ? <b>{fmtAzn(imp)}</b> : f.severity === "CRITICAL" ? "High" : "—"}</TableCell>
                   <TableCell><StatusBadge s={statusOf(f.findingId).status} /></TableCell>
                 </TableRow>
@@ -83,15 +81,17 @@ export function FindingsWorkspace({ selected, basePath }: { selected?: string | 
             <div className="text-xs text-muted-foreground">Estimated impact — requires human verification</div>
           </div>
           <ul className="divide-y">
-            {costed.map((f) => (
+            {costed.map((f) => {
+              if (!f.cost) return null;
+              return (
               <li key={f.findingId} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
                 <div>
                   <div className="font-medium">{f.title}</div>
-                  <div className="tabular font-mono text-xs text-muted-foreground">{fmtNum(f.cost!.quantity)} {f.cost!.unit} × {fmtAzn(f.cost!.unitPrice)}/{f.cost!.unit}</div>
+                  <div className="tabular font-mono text-xs text-muted-foreground">{fmtNum(f.cost.quantity)} {f.cost.unit} × {fmtAzn(f.cost.unitPrice)}/{f.cost.unit}</div>
                 </div>
-                <div className="tabular font-semibold">{fmtAzn(costImpact(f.cost)!)}</div>
+                <div className="tabular font-semibold">{fmtAzn(costImpact(f.cost) ?? 0)}</div>
               </li>
-            ))}
+            ); })}
           </ul>
           <div className="flex items-center justify-between border-t bg-muted/50 px-5 py-4">
             <span className="text-sm font-semibold">Total</span>
@@ -100,14 +100,7 @@ export function FindingsWorkspace({ selected, basePath }: { selected?: string | 
         </div>
         <div className="rounded-lg border bg-card">
           <div className="border-b px-5 py-3 text-sm font-semibold">Passed checks ({passedCount})</div>
-          <ul className="max-h-80 divide-y overflow-y-auto">
-            {(isLive ? [] : PASSED_CHECKS).map((p) => (
-              <li key={p.id} className="px-5 py-2.5 text-sm">
-                <div className="flex items-center gap-2"><SeverityBadge s="OK" /><span className="font-medium">{p.item}</span><span className="text-xs text-muted-foreground">— {p.detail}</span></div>
-                {p.semantic && <div className="mt-1.5 rounded bg-accent px-2 py-1 text-xs text-accent-foreground">Semantic match: “{p.semantic.a}” ≡ “{p.semantic.b}”</div>}
-              </li>
-            ))}
-          </ul>
+          <p className="px-5 py-3 text-sm text-muted-foreground">{passedCount} consistent checks reported by AI. Individual passed-check details were not returned.</p>
         </div>
       </div>
 

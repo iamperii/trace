@@ -54,7 +54,7 @@ export function Highlight({ text, mark }: { text: string; mark?: string | undefi
 }
 
 export function SyntheticTag() {
-  return <span className="rounded border border-dashed border-primary/40 bg-accent px-2 py-0.5 text-[11px] font-medium text-accent-foreground">Synthetic Demo Data</span>;
+  return null;
 }
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
